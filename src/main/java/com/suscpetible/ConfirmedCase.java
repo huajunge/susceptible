@@ -16,17 +16,24 @@ public class ConfirmedCase {
     private List<Cell> cells;
     private long confirmedTime;
     private HashMap<Cell, Double> riskMap;
+    private String name;
 
     public ConfirmedCase(List<Cell> cells, long confirmedTime) {
         this.cells = cells;
         this.confirmedTime = confirmedTime;
     }
 
+    public ConfirmedCase(List<Cell> cells, long confirmedTime, String name) {
+        this.cells = cells;
+        this.confirmedTime = confirmedTime;
+        this.name = name;
+    }
+
     public HashMap<Cell, Double> getRiskMap() {
         riskMap = new HashMap<>(cells.size());
         for (Cell cell : cells) {
             long t = cell.getTime();
-            int d = (int) ((t - confirmedTime - TIME_BIN * INTERVAL_DAYS) * TIME_BIN / 24 + 7);
+            int d = (int) ((t - confirmedTime - TIME_BIN * INTERVAL_DAYS) * TIME_BIN / 24.0 + 7);
             if (d < 0) {
                 d = 0;
             }
@@ -45,5 +52,9 @@ public class ConfirmedCase {
 
     public long getConfirmedTime() {
         return confirmedTime;
+    }
+
+    public String getName() {
+        return name;
     }
 }

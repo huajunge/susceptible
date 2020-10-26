@@ -47,7 +47,7 @@ public class RiskMapWithHistory {
     }
 
     public double decay(int days) {
-        return (1.0 / (Constants.MAX_DECAY * (24.0 / TIME_BIN))) * Math.pow(10, -days);
+        return Math.pow(10, -days);
         //return 1;
     }
 }

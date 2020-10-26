@@ -23,7 +23,7 @@ object Test {
     }).toMap
     val tmp = baodian.getLines().map(v => {
       val values = v.split("\t")
-      val geoHash = GeoHash.geoHashStringWithCharacterPrecision(values(6).toDouble, values(7).toDouble, 7)
+      val geoHash = GeoHash.geoHashStringWithCharacterPrecision(values(6).toDouble, values(7).toDouble, Constants.GEOHASH_LENGTH)
       //val time = ZonedDateTime.parse(values(1), DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss").withZone(ZoneId.systemDefault()))
       val formatter = new SimpleDateFormat("yyyyMMdd HH:mm:ss")
       val date = formatter.parse(values(1))
@@ -43,21 +43,23 @@ object Test {
       for (elem <- v._2) {
         list.addAll(elem._2.toList.asJava)
       }
-      new ConfirmedCase(list, ctTime(v._1))
-    }).toList
-    var riskMap = new RiskMap(cases.asJava)
-    var his = new RiskMapWithHistory(cases.asJava)
-    val gt =new GeoHashUT()
-//    for (elem <- riskMap.getRiskMap.entrySet().asScala) {
-//      val geo = gt.decode(elem.getKey.getGeohash)
-//      println(s"${geo(0)}")
-//      println(elem.getKey + "," + elem.getValue)
-//    }
-//    println("--------")
-//    println("--------")
-//    for (elem <- his.getRiskMap.entrySet().asScala) {
-//      println(elem.getKey + "," + elem.getValue)
-//    }
+      new ConfirmedCase(list, ctTime(v._1), v._1)
+    }).toList.sortBy(v => v.getConfirmedTime)
+    var riskMap = new RiskMap(cases.slice(0, 50).asJava)
+    var his = new RiskMapWithHistory(cases.slice(0, 50).asJava)
+    val gt = new GeoHashUT()
+    //    for (elem <- riskMap.getRiskMap.entrySet().asScala) {
+    //      val geo = GeoHash.fromGeohashString(elem.getKey.getGeohash)
+    //      println(s"${elem.getKey.getTime}\t${geo.getPoint.toString}\t${elem.getValue}")
+    //      //println(elem.getKey + "," + elem.getValue)
+    //    }
+    //    println("--------")
+    //    println("--------")
+    //    for (elem <- his.getRiskMap.entrySet().asScala) {
+    //      val geo = GeoHash.fromGeohashString(elem.getKey.getGeohash)
+    //      println(s"${elem.getKey.getTime}\t${geo.getPoint.toString}\t${elem.getValue}")
+    //      //println(elem.getKey + "," + elem.getValue)
+    //    }
 
     val personalRisk = new PersonalRisk()
     //    println(personalRisk.getRisk(cases(10).getCells, riskMap))
@@ -65,12 +67,48 @@ object Test {
     //    println(personalRisk.getRiskWithHistory(cases(10).getCells, his))
     //    println(personalRisk.getRiskWithNearest(cases(10).getCells, his))
 
-    for (i <- 0 to 59) {
-      println(s"-----$i--------")
+    for (i <- 40 to 59) {
+      //val tt = cases.filterNot(v => v.getName.equals(cases(i).getName)).asJava
+      riskMap = new RiskMap(cases.filterNot(v => v.getName.equals(cases(i).getName)).asJava)
+      //riskMap = new RiskMap(cases.slice(0, i).asJava)
+      // his = new RiskMapWithHistory(cases.filterNot(v => v.getName.equals(cases(i).getName)).asJava)
+      //      for (elem <- cases(i).getCells.asScala) {
+      //        println("======")
+      //        println(elem)
+      //        for (e <- riskMap.getRiskMap.asScala.filter(v => v._1.getGeohash.equals(elem.getGeohash) && (elem.getTime - v._1.getTime) >= 0 && (elem.getTime - v._1.getTime) <= (24.0 / Constants.TIME_BIN * Constants.MAX_DECAY))) {
+      //          println(e)
+      //        }
+      //      }
+      //      println("--------")
+      //      println("--------")
+      //      println("--------")
+      //
+      //      for (elem <- cases(i).getCells.asScala) {
+      //        println("======")
+      //        println(elem)
+      //        for (e <- his.getRiskMap.asScala.filter(v => v._1.getGeohash.equals(elem.getGeohash) && (elem.getTime - v._1.getTime) >= 0 && (elem.getTime - v._1.getTime) <= (24.0 / Constants.TIME_BIN * Constants.MAX_DECAY))) {
+      //          println(e)
+      //        }
+      //      }
+      //
+      //      println("--------")
+      //      println("--------")
+      //      println("--------")
+      //
+      //      for (elem <- cases(i).getCells.asScala) {
+      //        println("======")
+      //        println(elem)
+      //        for (e <- riskMap.getRiskMap.asScala.filter(v => v._1.getGeohash.equals(elem.getGeohash))) {
+      //          println(e)
+      //        }
+      //      }
+
+      println(s"-----$i, ${cases(i).getName}--------")
       println(personalRisk.getRisk(cases(i).getCells, riskMap))
       println(personalRisk.getRiskWithNearest(cases(i).getCells, riskMap))
-      println(personalRisk.getRiskWithHistory(cases(i).getCells, his))
-      println(personalRisk.getRiskWithNearest(cases(i).getCells, his))
+      println(personalRisk.getRiskWithHistory(cases(i).getCells, riskMap))
+      //println(personalRisk.getRiskWithHistory(cases(i).getCells, his))
+      println(personalRisk.getRiskWithHistAndNearest(cases(i).getCells, riskMap))
     }
   }
 }
