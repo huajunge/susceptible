@@ -81,7 +81,7 @@ public class PersonalRisk {
                     //sum += DIS_ERROR * getRiskWithHistory(new Cell(s, cell.getTime(), 0.0), riskMap);
                 }
             }
-            risk += cell.getProportion() * sum;
+            risk += (cell.getProportion() * sum);
         }
         return risk;
     }
@@ -90,14 +90,15 @@ public class PersonalRisk {
         double risk = 0;
         for (Cell cell : cells) {
             double sum = 0.0;
-            sum += getRiskWithHistory(cell, riskMap);
+            //sum += getRiskWithHistory(cell, riskMap);
             for (String s : GeoHashUtils.expand(cell.getGeohash(), "")) {
                 //sum += DIS_ERROR * riskMap.getRiskMap().getOrDefault(new Cell(s, cell.getTime(), 0.0), 0.0);
                 if (!s.equals(cell.getGeohash())) {
-                    sum += DIS_ERROR * getRiskWithHistory(new Cell(s, cell.getTime(), 0.0), riskMap);
+                    sum += DIS_ERROR * getRiskWithHistory(new Cell(s, cell.getTime(), cell.getProportion()), riskMap);
                 }
             }
-            risk += cell.getProportion() * sum;
+            //risk += cell.getProportion() * sum;
+            risk += (sum + getRiskWithHistory(cell, riskMap));
         }
         return risk;
     }

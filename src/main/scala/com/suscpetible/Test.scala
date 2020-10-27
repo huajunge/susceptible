@@ -67,7 +67,7 @@ object Test {
     //    println(personalRisk.getRiskWithHistory(cases(10).getCells, his))
     //    println(personalRisk.getRiskWithNearest(cases(10).getCells, his))
 
-    for (i <- 40 to 59) {
+    for (i <- 0 to 59) {
       //val tt = cases.filterNot(v => v.getName.equals(cases(i).getName)).asJava
       riskMap = new RiskMap(cases.filterNot(v => v.getName.equals(cases(i).getName)).asJava)
       //riskMap = new RiskMap(cases.slice(0, i).asJava)
