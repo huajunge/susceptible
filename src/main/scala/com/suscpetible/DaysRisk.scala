@@ -5,7 +5,6 @@ import java.text.SimpleDateFormat
 import java.util
 
 import ch.hsr.geohash.GeoHash
-import com.suscpetible.Constants.TIME_BIN
 
 import scala.collection.JavaConverters._
 import scala.io.Source
@@ -14,22 +13,24 @@ object DaysRisk {
   def main(args: Array[String]): Unit = {
     var baodian = Source.fromFile("D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\baodian.txt")
     var conTime = Source.fromFile("D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\time.csv")
+    val geoHashlength = args(1).toInt
+    val timeBIN = args(2).toInt
     val ctTime = conTime.getLines().map(v => {
       val values = v.split(",")
       //val time = ZonedDateTime.parse(values(1), DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.systemDefault()))
       val formatter = new SimpleDateFormat("yyyy-MM-dd")
       val date = formatter.parse(values(1))
 
-      val bin = date.toInstant.getEpochSecond / 3600 / TIME_BIN
+      val bin = date.toInstant.getEpochSecond / 3600 / timeBIN
       (values(0), bin)
     }).toMap
     val tmp = baodian.getLines().map(v => {
       val values = v.split("\t")
-      val geoHash = GeoHash.geoHashStringWithCharacterPrecision(values(6).toDouble, values(7).toDouble, Constants.GEOHASH_LENGTH)
+      val geoHash = GeoHash.geoHashStringWithCharacterPrecision(values(6).toDouble, values(7).toDouble, geoHashlength)
       //val time = ZonedDateTime.parse(values(1), DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss").withZone(ZoneId.systemDefault()))
       val formatter = new SimpleDateFormat("yyyyMMdd HH:mm:ss")
       val date = formatter.parse(values(1))
-      val bin = date.toInstant.getEpochSecond / 3600 / Constants.TIME_BIN
+      val bin = date.toInstant.getEpochSecond / 3600 / timeBIN
       (values(0), bin, geoHash)
     }).toList.groupBy(v => (v._1, v._2)).map(v => {
       val all = v._2.size
@@ -45,18 +46,20 @@ object DaysRisk {
       for (elem <- v._2) {
         list.addAll(elem._2.toList.asJava)
       }
-      new ConfirmedCase(list, ctTime(v._1), v._1)
+      new ConfirmedCase(list, ctTime(v._1), v._1, timeBIN)
     }).toList.sortBy(v => v.getConfirmedTime)
     var riskMap = new RiskMap(cases.slice(0, 50).asJava)
-    val personalRisk = new PersonalRisk()
-    val writer = new PrintWriter(new File("D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\days_risk.csv"))
+    val personalRisk = new PersonalRisk(timeBIN)
+
+    "D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\days_risk.csv"
+    val writer = new PrintWriter(new File(args(0)))
     writer.println("pin,day,risk,near_risk,his_risk,his_near_risk")
 
     for (i <- 0 to 59) {
       //val tt = cases.filterNot(v => v.getName.equals(cases(i).getName)).asJava
       riskMap = new RiskMap(cases.filterNot(v => v.getName.equals(cases(i).getName)).asJava)
       val days = cases(i).getCells.asScala.groupBy(cell => {
-        (cell.getTime * TIME_BIN) / 24
+        (cell.getTime * timeBIN) / 24
       }).map(cs => {
         val risk = personalRisk.getRisk(cs._2.toList.asJava, riskMap)
         val riskNear = personalRisk.getRiskWithNearest(cs._2.toList.asJava, riskMap)

@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.suscpetible.Constants.TIME_BIN;
 
 /**
  * @author : hehuajun3
@@ -14,8 +13,10 @@ import static com.suscpetible.Constants.TIME_BIN;
  **/
 public class RiskMapWithHistory {
     private HashMap<Cell, Double> riskMapWithHistory;
+    private int timeBin;
 
-    public RiskMapWithHistory(List<ConfirmedCase> cases) {
+    public RiskMapWithHistory(List<ConfirmedCase> cases, int timeBin) {
+        this.timeBin = timeBin;
         HashMap<Cell, Double> riskMap = new HashMap<>();
         this.riskMapWithHistory = new HashMap<>();
         for (ConfirmedCase aCase : cases) {
@@ -32,7 +33,7 @@ public class RiskMapWithHistory {
             int t = 1;
             long ti = cell.getKey().getTime();
             for (int i = 0; i <= Constants.MAX_DECAY; i++) {
-                for (int j = TIME_BIN; j <= 24; j += TIME_BIN) {
+                for (int j = timeBin; j <= 24; j += timeBin) {
                     double dec = decay(i);
                     risk += dec * riskMap.getOrDefault(new Cell(cell.getKey().getGeohash(), ti - t, 0.0), 0.0);
                     t++;

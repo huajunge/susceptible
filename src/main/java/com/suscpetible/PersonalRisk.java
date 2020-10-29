@@ -3,7 +3,6 @@ package com.suscpetible;
 import java.util.List;
 
 import static com.suscpetible.Constants.DIS_ERROR;
-import static com.suscpetible.Constants.TIME_BIN;
 
 /**
  * @author : hehuajun3
@@ -12,6 +11,12 @@ import static com.suscpetible.Constants.TIME_BIN;
  * @modified by :
  **/
 public class PersonalRisk {
+    private int timeBin;
+
+    public PersonalRisk(int timeBin) {
+        this.timeBin = timeBin;
+    }
+
     public double getRisk(List<Cell> cells, RiskMap riskMap) {
         double risk = 0;
         for (Cell cell : cells) {
@@ -28,7 +33,7 @@ public class PersonalRisk {
             long ti = cell.getTime();
             risk += riskMap.getRiskMap().getOrDefault(cell, 0.0);
             for (int i = 0; i <= Constants.MAX_DECAY; i++) {
-                for (int j = TIME_BIN; j <= 24; j += TIME_BIN) {
+                for (int j = timeBin; j <= 24; j += timeBin) {
                     double dec = decay(i);
                     risk += dec * riskMap.getRiskMap().getOrDefault(new Cell(cell.getGeohash(), ti - t, 0.0), 0.0);
                     t++;
@@ -44,7 +49,7 @@ public class PersonalRisk {
         long ti = cell.getTime();
         double risk = riskMap.getRiskMap().getOrDefault(cell, 0.0);
         for (int i = 0; i <= Constants.MAX_DECAY; i++) {
-            for (int j = TIME_BIN; j <= 24; j += TIME_BIN) {
+            for (int j = timeBin; j <= 24; j += timeBin) {
                 double dec = decay(i);
                 risk += dec * riskMap.getRiskMap().getOrDefault(new Cell(cell.getGeohash(), ti - t, 0.0), 0.0);
                 t++;

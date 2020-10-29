@@ -13,24 +13,26 @@ object Others {
   def main(args: Array[String]): Unit = {
     val baodian = Source.fromFile("D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\baodian.txt")
     val conTime = Source.fromFile("D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\time.csv")
-    val others = Source.fromFile("D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\dmubc_user_traje_epidemic_stat_china_i_d.txt")
+    val others = Source.fromFile(args(1))
+    val geoHashlength = args(2).toInt
+    val timeBIN = args(3).toInt
     val ctTime = conTime.getLines().map(v => {
       val values = v.split(",")
       //val time = ZonedDateTime.parse(values(1), DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.systemDefault()))
       val formatter = new SimpleDateFormat("yyyy-MM-dd")
       val date = formatter.parse(values(1))
 
-      val bin = date.toInstant.getEpochSecond / 3600 / Constants.TIME_BIN
+      val bin = date.toInstant.getEpochSecond / 3600 / timeBIN
       (values(0), bin)
     }).toMap
 
     val tmp = baodian.getLines().map(v => {
       val values = v.split("\t")
-      val geoHash = GeoHash.geoHashStringWithCharacterPrecision(values(6).toDouble, values(7).toDouble, Constants.GEOHASH_LENGTH)
+      val geoHash = GeoHash.geoHashStringWithCharacterPrecision(values(6).toDouble, values(7).toDouble, geoHashlength)
       //val time = ZonedDateTime.parse(values(1), DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss").withZone(ZoneId.systemDefault()))
       val formatter = new SimpleDateFormat("yyyyMMdd HH:mm:ss")
       val date = formatter.parse(values(1))
-      val bin = date.toInstant.getEpochSecond / 3600 / Constants.TIME_BIN
+      val bin = date.toInstant.getEpochSecond / 3600 / timeBIN
       (values(0), bin, geoHash)
     }).toList.groupBy(v => (v._1, v._2)).map(v => {
       val all = v._2.size
@@ -46,19 +48,19 @@ object Others {
       for (elem <- v._2) {
         list.addAll(elem._2.toList.asJava)
       }
-      new ConfirmedCase(list, ctTime(v._1), v._1)
+      new ConfirmedCase(list, ctTime(v._1), v._1, timeBIN)
     }).toList.sortBy(v => v.getConfirmedTime)
     var riskMap = new RiskMap(cases.slice(0, 50).asJava)
 
     val otherCells = others.getLines().map(v => {
       val values = v.split("\t")
       val geoH = GeoHash.fromGeohashString(values(2))
-      val geoHash = GeoHash.geoHashStringWithCharacterPrecision(geoH.getBoundingBoxCenterPoint.getLatitude, geoH.getBoundingBoxCenterPoint.getLongitude, Constants.GEOHASH_LENGTH)
+      val geoHash = GeoHash.geoHashStringWithCharacterPrecision(geoH.getBoundingBoxCenterPoint.getLatitude, geoH.getBoundingBoxCenterPoint.getLongitude, geoHashlength)
       //val time = ZonedDateTime.parse(values(1), DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss").withZone(ZoneId.systemDefault()))
       val formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
       val cnt = values(3).toInt
       val date = formatter.parse(values(1))
-      val bin = date.toInstant.getEpochSecond / 3600 / Constants.TIME_BIN
+      val bin = date.toInstant.getEpochSecond / 3600 / timeBIN
       (values(0), bin, geoHash, cnt)
     }).toList.groupBy(v => (v._1, v._2)).map(timeBin => {
       var all = 0
@@ -83,10 +85,10 @@ object Others {
       for (elem <- cells._2) {
         list.addAll(elem._2.toList.asJava)
       }
-      new ConfirmedCase(list, 0, cells._1)
+      new ConfirmedCase(list, 0, cells._1, timeBIN)
     }).toList
 
-    val personalRisk = new PersonalRisk()
+    val personalRisk = new PersonalRisk(timeBIN)
 
     //    for (i <- 0 to 59) {
     //      riskMap = new RiskMap(cases.filterNot(v => v.getName.equals(cases(i).getName)).asJava)
@@ -99,7 +101,8 @@ object Others {
     //    }
 
     riskMap = new RiskMap(cases.asJava)
-    val writer = new PrintWriter(new File("D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\others_all.csv"))
+    //val writer = new PrintWriter(new File("D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\others_all.csv"))
+    val writer = new PrintWriter(new File(args(0)))
     writer.println("pin,risk,near_risk,his_risk,his_near_risk")
 
     for (i <- otherCases.indices) {
@@ -108,8 +111,11 @@ object Others {
       val riskHis = personalRisk.getRiskWithHistory(otherCases(i).getCells, riskMap)
       val riskHisNear = personalRisk.getRiskWithHistAndNearest(otherCases(i).getCells, riskMap)
       writer.println(s"${otherCases(i).getName},$risk,$riskNear,$riskHis,$riskHisNear")
+      if (i % 1000 == 0) {
+        println(s"-----$i------")
+      }
       //println(s"-----$i, ${otherCases(i).getName}--------")
-      println(s"$i,${otherCases(i).getName},$risk,$riskNear,$riskHis,$riskHisNear")
+      //println(s"$i,${otherCases(i).getName},$risk,$riskNear,$riskHis,$riskHisNear")
     }
     baodian.close()
     conTime.close()

@@ -13,22 +13,24 @@ object Risk {
   def main(args: Array[String]): Unit = {
     var baodian = Source.fromFile("D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\baodian.txt")
     var conTime = Source.fromFile("D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\time.csv")
+    val geoHashlength = args(1).toInt
+    val timeBIN = args(2).toInt
     val ctTime = conTime.getLines().map(v => {
       val values = v.split(",")
       //val time = ZonedDateTime.parse(values(1), DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.systemDefault()))
       val formatter = new SimpleDateFormat("yyyy-MM-dd")
       val date = formatter.parse(values(1))
 
-      val bin = date.toInstant.getEpochSecond / 3600 / Constants.TIME_BIN
+      val bin = date.toInstant.getEpochSecond / 3600 / timeBIN
       (values(0), bin)
     }).toMap
     val tmp = baodian.getLines().map(v => {
       val values = v.split("\t")
-      val geoHash = GeoHash.geoHashStringWithCharacterPrecision(values(6).toDouble, values(7).toDouble, Constants.GEOHASH_LENGTH)
+      val geoHash = GeoHash.geoHashStringWithCharacterPrecision(values(6).toDouble, values(7).toDouble, geoHashlength)
       //val time = ZonedDateTime.parse(values(1), DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss").withZone(ZoneId.systemDefault()))
       val formatter = new SimpleDateFormat("yyyyMMdd HH:mm:ss")
       val date = formatter.parse(values(1))
-      val bin = date.toInstant.getEpochSecond / 3600 / Constants.TIME_BIN
+      val bin = date.toInstant.getEpochSecond / 3600 / timeBIN
       (values(0), bin, geoHash)
     }).toList.groupBy(v => (v._1, v._2)).map(v => {
       val all = v._2.size
@@ -44,11 +46,12 @@ object Risk {
       for (elem <- v._2) {
         list.addAll(elem._2.toList.asJava)
       }
-      new ConfirmedCase(list, ctTime(v._1), v._1)
+      new ConfirmedCase(list, ctTime(v._1), v._1, timeBIN)
     }).toList.sortBy(v => v.getConfirmedTime)
     var riskMap = new RiskMap(cases.slice(0, 50).asJava)
-    val personalRisk = new PersonalRisk()
-    val writer = new PrintWriter(new File("D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\risk_all.csv"))
+    val personalRisk = new PersonalRisk(timeBIN)
+    //val writer = new PrintWriter(new File("D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\risk_all.csv"))
+    val writer = new PrintWriter(new File(args(0)))
     writer.println("pin,risk,near_risk,his_risk,his_near_risk")
     for (i <- 0 to 59) {
       riskMap = new RiskMap(cases.filterNot(v => v.getName.equals(cases(i).getName)).asJava)
@@ -58,11 +61,7 @@ object Risk {
       val riskHisNear = personalRisk.getRiskWithHistAndNearest(cases(i).getCells, riskMap)
       writer.println(s"${cases(i).getName},$risk,$riskNear,$riskHis,$riskHisNear")
       println(s"-----$i, ${cases(i).getName}--------")
-      println(risk)
-      println(riskNear)
-      println(riskHis)
-      //println(personalRisk.getRiskWithHistory(cases(i).getCells, his))
-      println(riskHisNear)
+      println(s"$i,${cases(i).getName},$risk,$riskNear,$riskHis,$riskHisNear")
     }
     baodian.close()
     conTime.close()

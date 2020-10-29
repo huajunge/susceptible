@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.suscpetible.Constants.INTERVAL_DAYS;
-import static com.suscpetible.Constants.TIME_BIN;
 
 /**
  * @author : hehuajun3
@@ -17,23 +16,20 @@ public class ConfirmedCase {
     private long confirmedTime;
     private HashMap<Cell, Double> riskMap;
     private String name;
+    private int timeBin;
 
-    public ConfirmedCase(List<Cell> cells, long confirmedTime) {
-        this.cells = cells;
-        this.confirmedTime = confirmedTime;
-    }
-
-    public ConfirmedCase(List<Cell> cells, long confirmedTime, String name) {
+    public ConfirmedCase(List<Cell> cells, long confirmedTime, String name, int timeBin) {
         this.cells = cells;
         this.confirmedTime = confirmedTime;
         this.name = name;
+        this.timeBin = timeBin;
     }
 
     public HashMap<Cell, Double> getRiskMap() {
         riskMap = new HashMap<>(cells.size());
         for (Cell cell : cells) {
             long t = cell.getTime();
-            int d = (int) ((t - confirmedTime - TIME_BIN * INTERVAL_DAYS) * TIME_BIN / 24.0 + 7);
+            int d = (int) ((t - confirmedTime - timeBin * INTERVAL_DAYS) * timeBin / 24.0 + 7);
             if (d < 0) {
                 d = 0;
             }

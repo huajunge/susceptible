@@ -27,8 +27,8 @@ public class Constants {
             0.01383596,
             0.007556527
     };
-    public static int TIME_BIN = 2;
+    //public static int TIME_BIN = 2;
     public static int INTERVAL_DAYS = 5;
     public static int MAX_DECAY = 5;
-    public static int GEOHASH_LENGTH = 7;
+    //public static int GEOHASH_LENGTH = 7;
 }
