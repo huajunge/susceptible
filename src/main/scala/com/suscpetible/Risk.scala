@@ -41,19 +41,50 @@ object Risk {
       //println((v._1._1, cell))
       (v._1._1, cell, v._2)
     })
+    val outer = List(
+      "jd_64b4b2cd38ce3",
+      "18710069542_p",
+      "jd_7ec224bf0e114",
+      "zfqjin",
+      "jd_AiAVNFrQwsGv",
+      "jd_53d612d056df8",
+      "jd_XzFxkXxSynmI",
+      "jd_7caac0a060aaf",
+      "小淘儿er",
+      "jd_6c38e53451a81",
+      "jd_6502866d90370",
+      "charliechen1985",
+      "jd_AnayzjdbclWK",
+      "jd_6f50190882a20",
+      "jlshan",
+      "jd_7e8544d517203",
+      "tangzehui",
+      "jd_51bc9eec8e085",
+      "jd_4f709c8e1d47e",
+      "ywy15635521"
+    )
+
+
     val cases = tmp.groupBy(v => v._1).map(v => {
       val list = new util.ArrayList[Cell]()
       for (elem <- v._2) {
         list.addAll(elem._2.toList.asJava)
       }
       new ConfirmedCase(list, ctTime(v._1), v._1, timeBIN)
-    }).toList.sortBy(v => v.getConfirmedTime)
+    }).toList.filter(c => !outer.contains(c.getName)).sortBy(v => v.getConfirmedTime)
+//    val cases = tmp.groupBy(v => v._1).map(v => {
+//      val list = new util.ArrayList[Cell]()
+//      for (elem <- v._2) {
+//        list.addAll(elem._2.toList.asJava)
+//      }
+//      new ConfirmedCase(list, ctTime(v._1), v._1, timeBIN)
+//    }).toList.sortBy(v => v.getConfirmedTime)
     var riskMap = new RiskMap(cases.slice(0, 50).asJava)
     val personalRisk = new PersonalRisk(timeBIN)
     //val writer = new PrintWriter(new File("D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\risk_all.csv"))
     val writer = new PrintWriter(new File(args(0)))
     writer.println("pin,risk,near_risk,his_risk,his_near_risk")
-    for (i <- 0 to 59) {
+    for (i <- cases.indices) {
       riskMap = new RiskMap(cases.filterNot(v => v.getName.equals(cases(i).getName)).asJava)
       val risk = personalRisk.getRisk(cases(i).getCells, riskMap)
       val riskNear = personalRisk.getRiskWithNearest(cases(i).getCells, riskMap)

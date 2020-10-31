@@ -7,8 +7,7 @@ package com.suscpetible;
  * @modified by :
  **/
 public class Constants {
-    public static double[] interval = new double[]{};
-    public static double DIS_ERROR = 0.03;
+    public static double DIS_ERROR = 0.1;
     public static double[] transmission = new double[]{
             0.000683967, //-7
             0.004126712,
@@ -27,8 +26,7 @@ public class Constants {
             0.01383596,
             0.007556527
     };
-    //public static int TIME_BIN = 2;
+
     public static int INTERVAL_DAYS = 5;
     public static int MAX_DECAY = 5;
-    //public static int GEOHASH_LENGTH = 7;
 }

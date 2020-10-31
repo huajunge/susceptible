@@ -90,18 +90,7 @@ object Others {
 
     val personalRisk = new PersonalRisk(timeBIN)
 
-    //    for (i <- 0 to 59) {
-    //      riskMap = new RiskMap(cases.filterNot(v => v.getName.equals(cases(i).getName)).asJava)
-    //      println(s"-----$i, ${cases(i).getName}--------")
-    //      println(personalRisk.getRisk(cases(i).getCells, riskMap))
-    //      println(personalRisk.getRiskWithNearest(cases(i).getCells, riskMap))
-    //      println(personalRisk.getRiskWithHistory(cases(i).getCells, riskMap))
-    //      //println(personalRisk.getRiskWithHistory(cases(i).getCells, his))
-    //      println(personalRisk.getRiskWithHistAndNearest(cases(i).getCells, riskMap))
-    //    }
-
     riskMap = new RiskMap(cases.asJava)
-    //val writer = new PrintWriter(new File("D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\others_all.csv"))
     val writer = new PrintWriter(new File(args(0)))
     writer.println("pin,risk,near_risk,his_risk,his_near_risk")
 
@@ -114,8 +103,6 @@ object Others {
       if (i % 1000 == 0) {
         println(s"-----$i------")
       }
-      //println(s"-----$i, ${otherCases(i).getName}--------")
-      //println(s"$i,${otherCases(i).getName},$risk,$riskNear,$riskHis,$riskHisNear")
     }
     baodian.close()
     conTime.close()
