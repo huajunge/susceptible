@@ -37,7 +37,8 @@ object OthersDaysRisk {
       val all = v._2.size
       val time = v._1._2
       val cell = v._2.groupBy(v => v._3).map(v => {
-        new Cell(v._1, time, 1)
+        new Cell(v._1, time, v._2.size.toDouble / all.toDouble)
+        //new Cell(v._1, time, 1)
       })
       //println((v._1._1, cell))
       (v._1._1, cell, v._2)
@@ -118,7 +119,10 @@ object OthersDaysRisk {
         for (elem <- v._2) {
           cnt += elem._4
         }
-        new Cell(v._1, time, 1)
+        //new Cell(v._1, time, 1)
+        //new Cell(v._1, time, 1)
+        new Cell(v._1, time, cnt / all.toDouble)
+
       })
       //println((v._1._1, cell))
       (timeBin._1._1, cell, timeBin._2)

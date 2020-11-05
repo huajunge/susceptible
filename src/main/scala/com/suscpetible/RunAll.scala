@@ -5,10 +5,15 @@ import java.io.File
 object RunAll {
   def main(args: Array[String]): Unit = {
     val baseFilePath = s"D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\"
-    val dataSize = 5000
-    for (geoHashLength <- 7 to 7) {
+    val dataSize = 500003
+    val baseOutFilePath = s"D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\${dataSize}_${Constants.DIS_ERROR * 1000}\\"
+    val file = new File(baseOutFilePath)
+    if (!file.isDirectory) {
+      file.mkdir()
+    }
+    for (geoHashLength <- 6 to 7) {
       for (timeBin <- 2 to(24, 2)) {
-        val baseOutFilePath = s"D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\$dataSize\\${geoHashLength}_${timeBin}_${dataSize}\\"
+        val baseOutFilePath = s"D:\\onedriveEDU\\OneDrive - my.swjtu.edu.cn\\researches\\SuspectedInfectedCrowdsDetection\\data\\${dataSize}_${Constants.DIS_ERROR * 1000}\\${geoHashLength}_${timeBin}_${dataSize}\\"
         val file = new File(baseOutFilePath)
         if (!file.isDirectory) {
           file.mkdir()

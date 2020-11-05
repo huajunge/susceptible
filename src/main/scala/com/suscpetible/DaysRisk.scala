@@ -36,7 +36,8 @@ object DaysRisk {
       val all = v._2.size
       val time = v._1._2
       val cell = v._2.groupBy(v => v._3).map(v => {
-        new Cell(v._1, time, 1)
+        //new Cell(v._1, time, 1)
+        new Cell(v._1, time, v._2.size.toDouble / all.toDouble)
       })
       //println((v._1._1, cell))
       (v._1._1, cell, v._2)
